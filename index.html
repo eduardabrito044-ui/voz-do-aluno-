@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voz do Aluno - Eduarda Brito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <nav class="main-nav">
+        <button onclick="abrirAba('inicio')" class="tab-btn active">🏠 Início</button>
+        <button onclick="abrirAba('forum')" class="tab-btn">💬 Fórum</button>
+        <button onclick="abrirAba('apoio')" class="tab-btn">🛡️ Apoio</button>
+        <button id="theme-toggle">🌙</button>
+    </nav>
+
+    <div class="container">
+        <section id="aba-inicio" class="content-section">
+            <header>
+                <div class="icon-header">💜</div>
+                <h1>Voz do Aluno</h1>
+                <p>O seu espaço seguro na escola.</p>
+            </header>
+            
+            <form id="form-contato">
+                <input type="text" id="nome-contato" placeholder="Seu nome (opcional)">
+                <select id="assunto" required>
+                    <option value="" disabled selected>O que deseja?</option>
+                    <option value="Sugestão">💡 Sugestão</option>
+                    <option value="Elogio">🌟 Elogio</option>
+                </select>
+                <textarea id="mensagem-contato" rows="4" required placeholder="Escreva aqui sua mensagem..."></textarea>
+                <button type="submit" class="btn-main">Enviar Mensagem</button>
+            </form>
+
+            <hr class="divisor">
+
+            <div class="contatos-diretos">
+                <h3>Canais da Eduarda</h3>
+                <div class="links-grid">
+                    <a href="https://wa.me/5589981259467" target="_blank" class="contato-item">
+                        <span class="icon">💬</span>
+                        <span class="label">WhatsApp</span>
+                    </a>
+                    <a href="mailto:eduardabrito044@gmail.com" class="contato-item">
+                        <span class="icon">✉️</span>
+                        <span class="label">E-mail</span>
+                    </a>
+                    <a href="https://instagram.com/m.eduarda.brito25" target="_blank" class="contato-item">
+                        <span class="icon">📸</span>
+                        <span class="label">Instagram</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="aba-forum" class="content-section hidden">
+            <h2>🏛️ Mural da Galera</h2>
+            <div id="mural-mensagens" class="mural">
+                <p class="loading">Carregando mensagens...</p>
+            </div>
+            <div class="post-area">
+                <input type="text" id="post-user" placeholder="Seu apelido">
+                <div class="emoji-selector">
+                    <span>Sentimento:</span>
+                    <select id="post-emoji">
+                        <option value="😊">😊 Feliz</option>
+                        <option value="😐">😐 Neutro</option>
+                        <option value="😴">😴 Cansado</option>
+                        <option value="🤔">🤔 Pensativo</option>
+                    </select>
+                </div>
+                <textarea id="post-text" placeholder="Compartilhe algo com a turma..."></textarea>
+                <button onclick="postarNoForum()" class="btn-forum">Postar no Fórum</button>
+            </div>
+        </section>
+
+        <section id="aba-apoio" class="content-section hidden">
+            <div class="card-bullying">
+                <h2>🛡️ Espaço de Acolhimento</h2>
+                <p>Como você se sente agora? (Escolha para triagem prioritária)</p>
+                
+                <div class="emoji-grid">
+                    <label><input type="radio" name="sentimento" value="😭"> <span>😭</span></label>
+                    <label><input type="radio" name="sentimento" value="😢"> <span>😢</span></label>
+                    <label><input type="radio" name="sentimento" value="😐"> <span>😐</span></label>
+                    <label><input type="radio" name="sentimento" value="😡"> <span>😡</span></label>
+                    <label><input type="radio" name="sentimento" value="🧠"> <span>🧠</span></label>
+                </div>
+
+                <textarea id="desabafo-text" rows="5" placeholder="Pode desabafar, é 100% anônimo..."></textarea>
+                <button onclick="enviarDesabafo()" class="btn-sos">Enviar Desabafo Prioritário</button>
+            </div>
+            <div class="ajuda-rapida">
+                <a href="tel:188" class="link-cvv">📞 Precisa falar agora? Ligue 188 (CVV)</a>
+            </div>
+        </section>
+
+        <div id="feedback-success" class="hidden-msg">✅ Recebido com sucesso!</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
