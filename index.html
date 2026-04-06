@@ -2,107 +2,81 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voz do Aluno - Eduarda Brito</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal Ouvidoria - CETI José Marques</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
-    <nav class="main-nav">
-        <button onclick="abrirAba('inicio')" class="tab-btn active">🏠 Início</button>
-        <button onclick="abrirAba('forum')" class="tab-btn">💬 Fórum</button>
-        <button onclick="abrirAba('apoio')" class="tab-btn">🛡️ Apoio</button>
-        <button id="theme-toggle">🌙</button>
+    <nav class="sidebar">
+        <div class="logo-container">
+            <h1>Ouvidoria</h1>
+        </div>
+        <div class="nav-buttons">
+            <button id="btn-forum" class="active-btn" onclick="mudarAba('forum')">💬 Chat</button>
+            <button id="btn-mural" onclick="mudarAba('mural')">💡 Mural</button>
+            <button id="btn-sentimentos" onclick="mudarAba('sentimentos')">🎭 Humor</button>
+            <button id="btn-feedback" onclick="mudarAba('feedback')">🏫 Opinião</button>
+            <button id="btn-contatos" onclick="mudarAba('contatos')">📞 Contatos</button>
+        </div>
     </nav>
 
-    <div class="container">
-        <section id="aba-inicio" class="content-section">
-            <header>
-                <div class="icon-header">💜</div>
-                <h1>Voz do Aluno</h1>
-                <p>O seu espaço seguro na escola.</p>
-            </header>
+    <main class="main-content">
+        <section id="forum" class="aba active">
+            <div class="header-fixo">
+                <h2>Direct dos Alunos</h2>
+            </div>
+            <div id="feed-forum" class="feed"></div>
             
-            <form id="form-contato">
-                <input type="text" id="nome-contato" placeholder="Seu nome (opcional)">
-                <select id="assunto" required>
-                    <option value="" disabled selected>O que deseja?</option>
-                    <option value="Sugestão">💡 Sugestão</option>
-                    <option value="Elogio">🌟 Elogio</option>
-                </select>
-                <textarea id="mensagem-contato" rows="4" required placeholder="Escreva aqui sua mensagem..."></textarea>
-                <button type="submit" class="btn-main">Enviar Mensagem</button>
-            </form>
-
-            <hr class="divisor">
-
-            <div class="contatos-diretos">
-                <h3>Canais da Eduarda</h3>
-                <div class="links-grid">
-                    <a href="https://wa.me/5589981259467" target="_blank" class="contato-item">
-                        <span class="icon">💬</span>
-                        <span class="label">WhatsApp</span>
-                    </a>
-                    <a href="mailto:eduardabrito044@gmail.com" class="contato-item">
-                        <span class="icon">✉️</span>
-                        <span class="label">E-mail</span>
-                    </a>
-                    <a href="https://instagram.com/m.eduarda.brito25" target="_blank" class="contato-item">
-                        <span class="icon">📸</span>
-                        <span class="label">Instagram</span>
-                    </a>
+            <div class="footer-input">
+                <div class="input-container">
+                    <input type="text" id="input-msg" placeholder="Enviar mensagem...">
+                    <button class="send-btn" onclick="salvarMensagem()">Enviar</button>
                 </div>
             </div>
         </section>
 
-        <section id="aba-forum" class="content-section hidden">
-            <h2>🏛️ Mural da Galera</h2>
-            <div id="mural-mensagens" class="mural">
-                <p class="loading">Carregando mensagens...</p>
-            </div>
-            <div class="post-area">
-                <input type="text" id="post-user" placeholder="Seu apelido">
-                <div class="emoji-selector">
-                    <span>Sentimento:</span>
-                    <select id="post-emoji">
-                        <option value="😊">😊 Feliz</option>
-                        <option value="😐">😐 Neutro</option>
-                        <option value="😴">😴 Cansado</option>
-                        <option value="🤔">🤔 Pensativo</option>
-                    </select>
+        <section id="mural" class="aba">
+            <div class="header-fixo"><h2>Mural de Ideias</h2></div>
+            <div id="feed-mural" class="feed"></div>
+            <div class="footer-input">
+                <div class="input-container">
+                    <input type="text" id="input-ideia" placeholder="Sua sugestão...">
+                    <button class="send-btn" onclick="salvarIdeia()">Sugerir</button>
                 </div>
-                <textarea id="post-text" placeholder="Compartilhe algo com a turma..."></textarea>
-                <button onclick="postarNoForum()" class="btn-forum">Postar no Fórum</button>
             </div>
         </section>
 
-        <section id="aba-apoio" class="content-section hidden">
-            <div class="card-bullying">
-                <h2>🛡️ Espaço de Acolhimento</h2>
-                <p>Como você se sente agora? (Escolha para triagem prioritária)</p>
-                
+        <section id="sentimentos" class="aba">
+            <div class="header-fixo"><h2>Como você está hoje?</h2></div>
+            <div class="content-scroll">
                 <div class="emoji-grid">
-                    <label><input type="radio" name="sentimento" value="😭"> <span>😭</span></label>
-                    <label><input type="radio" name="sentimento" value="😢"> <span>😢</span></label>
-                    <label><input type="radio" name="sentimento" value="😐"> <span>😐</span></label>
-                    <label><input type="radio" name="sentimento" value="😡"> <span>😡</span></label>
-                    <label><input type="radio" name="sentimento" value="🧠"> <span>🧠</span></label>
+                    <button onclick="votarHumor('😊')">😊</button>
+                    <button onclick="votarHumor('😴')">😴</button>
+                    <button onclick="votarHumor('🤓')">🤓</button>
+                    <button onclick="votarHumor('🤩')">🤩</button>
+                    <button onclick="votarHumor('😡')">😡</button>
+                    <button onclick="votarHumor('🥰')">🥰</button>
                 </div>
-
-                <textarea id="desabafo-text" rows="5" placeholder="Pode desabafar, é 100% anônimo..."></textarea>
-                <button onclick="enviarDesabafo()" class="btn-sos">Enviar Desabafo Prioritário</button>
-            </div>
-            <div class="ajuda-rapida">
-                <a href="tel:188" class="link-cvv">📞 Precisa falar agora? Ligue 188 (CVV)</a>
             </div>
         </section>
 
-        <div id="feedback-success" class="hidden-msg">✅ Recebido com sucesso!</div>
-    </div>
+        <section id="feedback" class="aba">
+            <div class="header-fixo"><h2>Sua Opinião</h2></div>
+            <div class="content-scroll">
+                <textarea id="texto-feedback" placeholder="O que você mudaria na escola?"></textarea>
+                <button class="btn-insta" onclick="enviarFeedback()">Enviar Feedback</button>
+            </div>
+        </section>
 
-    <script src="script.js"></script>
+        <section id="contatos" class="aba">
+            <div class="header-fixo"><h2>Contatos</h2></div>
+            <div class="content-scroll">
+                <a href="https://wa.me/5589981259467" class="btn-insta wa">WhatsApp Oficial</a>
+                <a href="https://instagram.com/m.eduarda.brito25" class="btn-insta ig">Instagram</a>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
