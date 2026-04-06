@@ -1,84 +1,93 @@
-// Substitua pelas suas chaves do Firebase Console
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
 const firebaseConfig = {
-    apiKey: "SUA_API_KEY_AQUI",
-    projectId: "seu-projeto-id",
-    appId: "seu-app-id"
+  apiKey: "AIzaSyBdlHar22iODe81f-nrUi06PLWKQReb9Gc",
+  authDomain: "siteescolaeduarda.firebaseapp.com",
+  databaseURL: "https://siteescolaeduarda-default-rtdb.firebaseio.com",
+  projectId: "siteescolaeduarda",
+  storageBucket: "siteescolaeduarda.firebasestorage.app",
+  messagingSenderId: "381495876879",
+  appId: "1:381495876879:web:4366dc25b119a2567e327a"
 };
 
-if (firebaseConfig.apiKey !== "SUA_API_KEY_AQUI") {
-    firebase.initializeApp(firebaseConfig);
-    var db = firebase.firestore();
-}
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-// Troca de Abas
-function abrirAba(nomeAba) {
-    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('aba-' + nomeAba).classList.remove('hidden');
-    event.currentTarget.classList.add('active');
-    if (nomeAba === 'forum') carregarForum();
-}
+let nome = localStorage.getItem("nome") || prompt("Como deseja ser chamado?") || "Anônimo";
+localStorage.setItem("nome", nome);
 
-// Modo Escuro
-document.getElementById('theme-toggle').addEventListener('click', () => {
-    const html = document.documentElement;
-    const isDark = html.getAttribute('data-theme') === 'dark';
-    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    document.getElementById('theme-toggle').textContent = isDark ? '🌙' : '☀️';
+// SISTEMA DE ABAS
+window.mudarAba = (id) => {
+    document.querySelectorAll(".aba").forEach(a => a.classList.remove("active"));
+    document.querySelectorAll(".sidebar button").forEach(b => b.classList.remove("active-btn"));
+    
+    document.getElementById(id).classList.add("active");
+    const btnId = "btn-" + id;
+    if(document.getElementById(btnId)) document.getElementById(btnId).classList.add("active-btn");
+};
+
+// CHAT
+window.salvarMensagem = () => {
+    const input = document.getElementById("input-msg");
+    if (!input.value.trim()) return;
+    push(ref(db, "mensagens"), {
+        nome,
+        texto: input.value,
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+    input.value = "";
+};
+
+onValue(ref(db, "mensagens"), (snapshot) => {
+    const feed = document.getElementById("feed-forum");
+    if(!feed) return;
+    feed.innerHTML = "";
+    snapshot.forEach((child) => {
+        const d = child.val();
+        const div = document.createElement("div");
+        div.className = `msg-post ${d.nome === nome ? 'me' : 'outro'}`;
+        div.innerHTML = `
+            <span class="msg-name">${d.nome}</span>
+            <span class="msg-text">${d.texto}</span>
+            <span class="msg-time">${d.hora}</span>
+        `;
+        feed.appendChild(div);
+    });
+    feed.scrollTop = feed.scrollHeight;
 });
 
-// Fórum
-function postarNoForum() {
-    const user = document.getElementById('post-user').value || "Anônimo";
-    const text = document.getElementById('post-text').value;
-    const emoji = document.getElementById('post-emoji').value;
+// MURAL
+window.salvarIdeia = () => {
+    const input = document.getElementById("input-ideia");
+    if (!input.value.trim()) return;
+    push(ref(db, "mural"), {
+        autor: nome,
+        texto: input.value,
+        data: new Date().toLocaleDateString()
+    });
+    input.value = "";
+    alert("Enviado para o mural!");
+};
 
-    if (!text) return alert("Escreva algo no post!");
+onValue(ref(db, "mural"), (snapshot) => {
+    const feed = document.getElementById("feed-mural");
+    if(!feed) return;
+    feed.innerHTML = "";
+    snapshot.forEach((child) => {
+        const d = child.val();
+        const div = document.createElement("div");
+        div.className = "msg-post outro";
+        div.style.maxWidth = "100%";
+        div.innerHTML = `<b>${d.autor}</b><br>${d.texto}<br><small>${d.data}</small>`;
+        feed.appendChild(div);
+    });
+});
 
-    if (typeof db !== 'undefined') {
-        db.collection("forum").add({
-            nome: user,
-            mensagem: text,
-            sentimento: emoji,
-            data: new Date()
-        }).then(() => { document.getElementById('post-text').value = ""; });
-    } else {
-        alert("Firebase não conectado!");
-    }
-}
-
-function carregarForum() {
-    const mural = document.getElementById('mural-mensagens');
-    if (typeof db !== 'undefined') {
-        db.collection("forum").orderBy("data", "desc").limit(10).onSnapshot(snap => {
-            mural.innerHTML = "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                mural.innerHTML += `<div class="post-card"><span>${d.sentimento}</span> <b>${d.nome}:</b> ${d.mensagem}</div>`;
-            });
-        });
-    }
-}
-
-// Apoio e Triagem
-function enviarDesabafo() {
-    const texto = document.getElementById('desabafo-text').value;
-    const emojiSel = document.querySelector('input[name="sentimento"]:checked');
-
-    if (!emojiSel || !texto) return alert("Preencha o emoji e o texto.");
-
-    const emoji = emojiSel.value;
-    const urgente = (emoji === '😭' || emoji === '😡' || emoji === '😢');
-
-    if (typeof db !== 'undefined') {
-        db.collection("desabafos").add({
-            texto: texto,
-            sentimento: emoji,
-            prioridade: urgente,
-            data: new Date()
-        }).then(() => {
-            alert(urgente ? "Recebido! Vamos te dar atenção prioritária." : "Obrigado por compartilhar.");
-            document.getElementById('desabafo-text').value = "";
-        });
-    }
-}
+// OUTRAS FUNÇÕES
+window.votarHumor = (tipo) => { push(ref(db, "humor"), { usuario: nome, voto: tipo }); alert("Voto registrado!"); };
+window.enviarFeedback = () => {
+    const txt = document.getElementById("texto-feedback");
+    push(ref(db, "feedback"), { usuario: nome, comentario: txt.value });
+    txt.value = ""; alert("Enviado!");
+};
